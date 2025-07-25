@@ -1,0 +1,36 @@
+# .github/workflows/build.yml
+name: Android CI/CD
+
+on:
+  push:
+    branches:
+      - main # Trigger on pushes to the main branch
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest # Use a fresh Ubuntu runner
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4 # Use the latest checkout action
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4 # Use the latest setup-java action
+      with:
+        java-version: '17'
+        distribution: 'temurin' # Recommended distribution for GitHub Actions
+        cache: 'gradle' # Cache Gradle dependencies
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug --stacktrace # Build debug APK, include stacktrace for debugging
+
+    - name: Upload Debug APK
+      uses: actions/upload-artifact@v4 # Use the latest upload-artifact action
+      with:
+        name: frp-client-debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 7 # Keep artifact for 7 days
